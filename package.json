@@ -1,7 +1,7 @@
 {
   "name": "@pacts/pacts-core",
   "version": "0.0.1-beta.0",
-  "description": "P.A.C.T.S (page and components tool set). Build, render and serve web-pages and web-components",
+  "description": "P.A.C.T.S (pages and components tool set). Build, render and serve web-pages and web-components",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pacts-org/pacts-core.git"
+    "url": "git+https://github.com/pacts-org/pacts-core.git"
   },
   "author": "Ben Rubin",
   "license": "MIT",
@@ -20,5 +20,9 @@
   "devDependencies": {
     "express": "^4.16.4",
     "morgan": "^1.9.1"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/pacts-org/pacts-core/issues"
+  },
+  "homepage": "https://github.com/pacts-org/pacts-core#readme"
 }

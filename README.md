@@ -1,3 +1,5 @@
+## P.A.C.T.S. (pages and components tool set)
+
 ### Sections
 - [Introduction](#Introduction)
 - [Goal](#Goal)
@@ -11,7 +13,7 @@
 
 # Note to all
 This project is in its early stages
-web-components-node is fully functional but the interfaces may change
+pacts is fully functional but the interfaces may change
 
 # Introduction
 This project is meant to serve as a way to use web components in place of a framework. By no means is this meant to act as a replacement for frameworks (React, Angular, Vue, ...). If you are looking for something simple, performant, with server-side rendering support then this project may interest you.
@@ -25,28 +27,15 @@ To create a set of tools that let you serve web-components from a server, Pre-re
 
 # Config
 ```javascript
-const { setConfig } = require('web-components-node')
+const { setConfig } = require('@pacts/pacts-core')
 
 setConfig({
-  /*
-   * default: 'template'
-   * The default method name for templates used by the template renderer
-   */
-  templateMethod: 'template',
-
   /*
    * default: true
    * This will memoize certain methods to prevent unnecessary processing
    * This is essantially equal to static file performance after the first request
    */
   memoize: true,
-
-  /*
-   * default: true
-   * This will minify the js in component script tags and the component tmeplate html
-   * This can help redice file size
-   */
-  minify: true,
 
   /*
    * default: true
@@ -57,7 +46,7 @@ setConfig({
 ```
 
 # Example:
-For a full example take a look at the documentation site [github](https://github.com/B-3PO/web-components-node-website)
+For a full example take a look at the documentation site [github](https://github.com/pacts-org/pacts-documentation)
 ```bash
   # run example locally
   # clone the repo
@@ -65,7 +54,7 @@ For a full example take a look at the documentation site [github](https://github
   npm run example
 ```
 
-This is a short example of serving a page from an Expess server that can re-render on the font end. This example assumes you have previous knowledge of Node+Expressjs
+This is a short example of serving a page from an Express server that can re-render on the font end. This example assumes you have previous knowledge of Node+Expressjs
 ```javascript
 // express endpoint
 const { fileHandler } = require('web-components-node');
@@ -75,10 +64,7 @@ app.get('/home', async (req, res) => {
 });
 
 // page template
-const {
-  browserScripts,
-  html
-} = require('web-components-node');
+const { html } = require('web-components-node');
 
 function pageTemplate({ title, head, body }) {
   return html`
@@ -102,14 +88,13 @@ function pageTemplate({ title, head, body }) {
 
 // page module
 const {
-  customElements,
-  HTMLElement,
+  Page,
   html
 } = require('web-components-node');
 const { getStates } = require('../services/states');
 
 
-const page = customElements.defineWithRender('home-page', class extends HTMLElement {
+const page = new class HomePage extends Page {
   constructor() {
     super();
     this.list = [];
@@ -119,32 +104,34 @@ const page = customElements.defineWithRender('home-page', class extends HTMLElem
     this.selectedCity = null;
   }
 
+  static title() {
+    return 'home page'
+  }
+
   async connectedCallback() {
     const { data } = await axios.get('/api/states');
     this.states = data.states;
     this.render();
   }
 
-  template() {
+  html() {
     return html`
-      <div id="content">
-        <h2>Interactive</h2>
+      <h2>Interactive</h2>
 
-        <div>
-          <select onChange="$homePage.stateSelectChange(this.value)">
-            <option value="" disabled ${this.selectedState === null ? 'selected' : ''}>State...</option>
-            ${this.states.map(s => html`
-              <option value="${s.name}" ${this.selectedState === s.name ? 'selected' : ''}>${s.name}</option>
-            `).join('\n')}
-          </select>
+      <div>
+        <select onChange="$HomePage.stateSelectChange(this.value)">
+          <option value="" disabled ${this.selectedState === null ? 'selected' : ''}>State...</option>
+          ${this.states.map(s => html`
+            <option value="${s.name}" ${this.selectedState === s.name ? 'selected' : ''}>${s.name}</option>
+          `).join('\n')}
+        </select>
 
-          <select onChange="$homePage.citySelectChange(this.value)">
-            <option value="" disabled ${this.selectedCity === null ? 'selected' : ''}>City...</option>
-            ${this.cities.map(c => html`
-              <option value="${c.name}" ${this.selectedCity === c.name ? 'selected' : ''}>${c.name}</option>
-            `).join('\n')}
-          </select>
-        </div>
+        <select onChange="$HomePage.citySelectChange(this.value)">
+          <option value="" disabled ${this.selectedCity === null ? 'selected' : ''}>City...</option>
+          ${this.cities.map(c => html`
+            <option value="${c.name}" ${this.selectedCity === c.name ? 'selected' : ''}>${c.name}</option>
+          `).join('\n')}
+        </select>
       </div>
     `;
   }
@@ -199,12 +186,11 @@ Prior to frameworks there was no way to attach a function to an element. The onl
 
 **Web Component :  customeElements**
 ```javascript
-customElements.define('some-element', class extends HTMLElement {
+customElements.define('some-element', class extends HTMLElementExtended {
   constructor() {
     super();
     this.name = 'the name';
-    this.root = this.attachShadow({ mode: 'open' });
-    this.root.append(document.querySelector('#someElement').content.cloneNode(true));
+    this.cloneTemplate();
   }
 
   // this method is accessible to an the element
@@ -222,8 +208,3 @@ customElements.define('some-element', class extends HTMLElement {
 
 <some-element></some-element>
 ```
-
-# Why?
-At the time I created this repo I was in the process of interviewing for a new job. Almost every company asked me what frameworks I preferred. My development experience in the web started prior to frameworks being available, so when I thought about the question of which framework, the only answer I could confidently say was "I don't prefer any of them". This does not mean I do not see value in frameworks or do not enjoy working in them, because I do see value and have built some great projects with some of them. But now you can find native alternatives to many of the features that frameworks fulfilled.
-
-I decided to take a hard look at how I might build my next web application. What you see here is the fruits of my research. I realized that web components solve one of the biggest problems that could not be achieved without a framework in the past. The ability to scope code to a block of HTML. Almost all the other features needed to work in the web (querySelector, template literals, ...) are available natively in the majority of browsers today.
